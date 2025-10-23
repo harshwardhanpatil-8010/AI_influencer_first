@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # Main application service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env  # Load environment variables from a .env file
+    depends_on:
+      - db
+      - redis
+    # Command to run the service. Can override the Dockerfile's CMD.
+    # command: gunicorn --bind 0.0.0.0:8000 wsgi:app
+
+  # PostgreSQL Database Service
+  db:
+    image: postgres:15-alpine
+    volumes:
+      # Persist database data
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "5432:5432"
+
+  # Redis Caching Service
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+# Docker Volumes for data persistence
+volumes:
+  postgres_data:
